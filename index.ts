@@ -1,6 +1,7 @@
 import { Connection, clusterApiUrl, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Metaplex } from "@metaplex-foundation/js";
-import { RAYDIUM_AUTHORITY, WRAPPED_SOL, TokenInfo, Config, truncateAddress, calculatePercentage, formatTokenSupply } from "./utils.js";
+import { CoinGeckoClient } from "coingecko-api-v3";
+import { RAYDIUM_AUTHORITY, WRAPPED_SOL, TokenInfo, Config, truncateAddress, calculatePercentage, formatTokenSupply, checkValues, checkTokenPrice } from "./utils.js";
 const solanaConnection = new Connection(clusterApiUrl('mainnet-beta'))
 
 const watchRayduim = () => {
@@ -52,24 +53,40 @@ class TokenData {
   private metaplex: Metaplex;
   private mint: PublicKey;
   private holdersInfo: string;
+  public solPrice: number;
+  private client: CoinGeckoClient;
+  public quoteValue: number;
+  public baseValue : number;
   constructor(tokenAObject: TokenInfo, tokenBObject: TokenInfo) {
     this.tokenA = tokenAObject
     this.tokenB = tokenBObject
     this.connection = new Connection(Config.RPC_CONNECTION)
     this.metaplex = Metaplex.make(this.connection)
+    this.client = new CoinGeckoClient({
+      timeout: 10000,
+      autoRetry: true,
+    });
   }
 
   async checkQuoteToken() {
     if (this.tokenA.mint === WRAPPED_SOL) {
       this.quoteToken = this.tokenA.mint
-      this.quoteAmount = formatTokenSupply(this.tokenA.uiTokenAmount.uiAmount )
+      this.quoteAmount = formatTokenSupply(this.tokenA.uiTokenAmount.uiAmount)
+      // Our logic for working with single price 
+      this.quoteValue =  this.tokenA.uiTokenAmount.uiAmount
       this.baseToken = this.tokenB.mint
-      this.baseAmount = formatTokenSupply(this.tokenB.uiTokenAmount.uiAmount )
+      this.baseAmount = formatTokenSupply(this.tokenB.uiTokenAmount.uiAmount)
+      // Our logic for working with single price 
+      this.baseValue = this.tokenB.uiTokenAmount.uiAmount
     } else {
       this.quoteToken = this.tokenB.mint
-      this.quoteAmount = formatTokenSupply(this.tokenB.uiTokenAmount.uiAmount )
+      this.quoteAmount = formatTokenSupply(this.tokenB.uiTokenAmount.uiAmount)
+      // Our logic for working with single price 
+      this.quoteValue =  this.tokenB.uiTokenAmount.uiAmount
       this.baseToken = this.tokenA.mint
       this.baseAmount = formatTokenSupply(this.tokenA.uiTokenAmount.uiAmount)
+      // Our logic for working with single price 
+      this.baseValue = this.tokenA.uiTokenAmount.uiAmount
     }
     this.mint = new PublicKey(this.baseToken)
   }
@@ -82,20 +99,26 @@ class TokenData {
   async fetchTopHolders() {
     let holdersInfo = "🐋 Holders\n"
     const topHolders = await this.connection.getTokenLargestAccounts(this.mint, 'finalized')
-    topHolders.value.slice(0,6).forEach(acct => {
+    topHolders.value.slice(0, 6).forEach(acct => {
       holdersInfo += `<a href="https://solscan.io/account/${acct.address.toBase58()}"> ${truncateAddress(acct.address.toString())} (${calculatePercentage(this.baseSupply, acct.uiAmount)}%)</a>\n`
     })
     this.holdersInfo = holdersInfo;
   }
 
   async priceQuote() {
-    //
+    let price = await this.client.simplePrice({
+      vs_currencies: 'usd',
+      ids: 'solana'
+    }
+    )
+    this.solPrice = price.solana.usd
   }
 
   async fetchBaseInfo() {
     const setInfo = await this.checkQuoteToken()
     const supply = await this.fetchTokenSupply()
     const holders = await this.fetchTopHolders()
+    let price = await this.priceQuote()
     const token = await this.metaplex
       .nfts()
       .findByMint({ mintAddress: new PublicKey(this.baseToken) });
@@ -109,8 +132,16 @@ class TokenData {
     this.freezeAuthorityAddress = token.mint.freezeAuthorityAddress !== null ? "No ⛔️" : "Yes ✅";
     this.mutableMeta = token.isMutable === true ? "Yes ⛔️" : "No ✅";
 
-    let msg = `${this.baseName} → (${this.baseSymbol})\n\nMeta™\nBase: ${this.baseAmount} ${this.baseName} → ($worth)\nQuote: ${this.quoteAmount} SOL → ($worth)\n\n`
-    msg += `Token Mint → ${formatTokenSupply(this.baseSupply)} ${this.baseName}\nPrice ${this.baseName} → ($price_token)\nMarketCap → ($value)\n\n${this.baseInfo}\n\n`
+    //some logic perform
+    const liquidtyValue = checkValues(this.quoteValue,this.solPrice)
+    const _basePrice = checkTokenPrice(this.baseValue,this.quoteValue,this.solPrice)
+    const mcap = (_basePrice * this.baseSupply).toLocaleString(undefined,{maximumFractionDigits:2})
+
+    let basePrice = _basePrice.toLocaleString(undefined,{maximumFractionDigits:8})
+
+
+    let msg = `${this.baseName} → (${this.baseSymbol})\n\nMeta™\nBase: ${this.baseAmount} ${this.baseName}\nQuote: ${this.quoteAmount} SOL → ($${liquidtyValue})\n\n`
+    msg += `Token Mint → ${formatTokenSupply(this.baseSupply)} ${this.baseName}\nPrice ${this.baseName} → ($${basePrice})\nMarketCap → ($${mcap})\n\n${this.baseInfo}\n\n`
     msg += this.holdersInfo
     msg += `\n🔒 Risks\nMint Authority → ${this.mintAuthorityAddress}\nFreeze Authority → ${this.freezeAuthorityAddress}\nMutable Metadata → ${this.mutableMeta} `
     console.log(msg)

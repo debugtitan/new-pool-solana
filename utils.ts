@@ -2,7 +2,7 @@ import { PublicKey, clusterApiUrl } from "@solana/web3.js";
 import 'dotenv/config.js'
 
 export const RAYDIUM_AUTHORITY = new PublicKey("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1")
-export const WRAPPED_SOL =  "So11111111111111111111111111111111111111112"
+export const WRAPPED_SOL = "So11111111111111111111111111111111111111112"
 
 export const Config = {
     RPC_CONNECTION: process.env.RPC_CONNECTION || clusterApiUrl('mainnet-beta')
@@ -19,7 +19,7 @@ export function truncateAddress(address: string) {
     }
 }
 
-export const  calculatePercentage = (totalSupply:number, userHoldings:number | any) =>{
+export const calculatePercentage = (totalSupply: number, userHoldings: number | any) => {
     const percentage = (userHoldings / totalSupply) * 100;
     return percentage.toFixed(2)
 }
@@ -40,7 +40,13 @@ export const formatTokenSupply = (tokenSupply: number) => {
     }
 }
 
+export const checkValues = (tokenAmount: number, price: number) => {
+    return (tokenAmount * price).toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
 
+export const checkTokenPrice = (base: number, quote: number, price: number) => {
+    return (quote / base) * price
+}
 
 
 type UiTokenAmount = {
