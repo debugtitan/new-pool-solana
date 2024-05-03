@@ -5,7 +5,9 @@ export const RAYDIUM_AUTHORITY = new PublicKey("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTV
 export const WRAPPED_SOL = "So11111111111111111111111111111111111111112"
 
 export const Config = {
-    RPC_CONNECTION: process.env.RPC_CONNECTION || clusterApiUrl('mainnet-beta')
+    RPC_CONNECTION: process.env.RPC_CONNECTION || clusterApiUrl('mainnet-beta'),
+    BOT_TOKEN: process.env.BOT_TOKEN || '',
+    CHANNEL_ID: process.env.CHANNEL_ID || ''
 }
 
 export function truncateAddress(address: string) {

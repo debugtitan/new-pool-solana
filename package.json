@@ -15,6 +15,7 @@
     "@solana/web3.js": "^1.91.7",
     "coingecko-api-v3": "^0.0.29",
     "dotenv": "^16.4.5",
+    "telegraf": "^4.16.3",
     "typescript": "^5.4.5"
   },
   "devDependencies": {

@@ -1,8 +1,11 @@
 import { Connection, clusterApiUrl, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Metaplex } from "@metaplex-foundation/js";
 import { CoinGeckoClient } from "coingecko-api-v3";
+import { Telegraf, Markup } from "telegraf";
 import { RAYDIUM_AUTHORITY, WRAPPED_SOL, TokenInfo, Config, truncateAddress, calculatePercentage, formatTokenSupply, checkValues, checkTokenPrice } from "./utils.js";
+
 const solanaConnection = new Connection(clusterApiUrl('mainnet-beta'))
+const bot = new Telegraf(Config.BOT_TOKEN);
 
 const watchRayduim = () => {
   console.log("Websocket Running")
@@ -56,7 +59,7 @@ class TokenData {
   public solPrice: number;
   private client: CoinGeckoClient;
   public quoteValue: number;
-  public baseValue : number;
+  public baseValue: number;
   constructor(tokenAObject: TokenInfo, tokenBObject: TokenInfo) {
     this.tokenA = tokenAObject
     this.tokenB = tokenBObject
@@ -73,7 +76,7 @@ class TokenData {
       this.quoteToken = this.tokenA.mint
       this.quoteAmount = formatTokenSupply(this.tokenA.uiTokenAmount.uiAmount)
       // Our logic for working with single price 
-      this.quoteValue =  this.tokenA.uiTokenAmount.uiAmount
+      this.quoteValue = this.tokenA.uiTokenAmount.uiAmount
       this.baseToken = this.tokenB.mint
       this.baseAmount = formatTokenSupply(this.tokenB.uiTokenAmount.uiAmount)
       // Our logic for working with single price 
@@ -82,7 +85,7 @@ class TokenData {
       this.quoteToken = this.tokenB.mint
       this.quoteAmount = formatTokenSupply(this.tokenB.uiTokenAmount.uiAmount)
       // Our logic for working with single price 
-      this.quoteValue =  this.tokenB.uiTokenAmount.uiAmount
+      this.quoteValue = this.tokenB.uiTokenAmount.uiAmount
       this.baseToken = this.tokenA.mint
       this.baseAmount = formatTokenSupply(this.tokenA.uiTokenAmount.uiAmount)
       // Our logic for working with single price 
@@ -133,19 +136,37 @@ class TokenData {
     this.mutableMeta = token.isMutable === true ? "Yes ⛔️" : "No ✅";
 
     //some logic perform
-    const liquidtyValue = checkValues(this.quoteValue,this.solPrice)
-    const _basePrice = checkTokenPrice(this.baseValue,this.quoteValue,this.solPrice)
-    const mcap = (_basePrice * this.baseSupply).toLocaleString(undefined,{maximumFractionDigits:2})
+    const liquidtyValue = checkValues(this.quoteValue, this.solPrice)
+    const _basePrice = checkTokenPrice(this.baseValue, this.quoteValue, this.solPrice)
+    const mcap = (_basePrice * this.baseSupply).toLocaleString(undefined, { maximumFractionDigits: 2 })
 
-    let basePrice = _basePrice.toLocaleString(undefined,{maximumFractionDigits:8})
-
+    let basePrice = _basePrice.toLocaleString(undefined, { maximumFractionDigits: 8 })
 
     let msg = `${this.baseName} → (${this.baseSymbol})\n\nMeta™\nBase: ${this.baseAmount} ${this.baseName}\nQuote: ${this.quoteAmount} SOL → ($${liquidtyValue})\n\n`
     msg += `Token Mint → ${formatTokenSupply(this.baseSupply)} ${this.baseName}\nPrice ${this.baseName} → ($${basePrice})\nMarketCap → ($${mcap})\n\n${this.baseInfo}\n\n`
     msg += this.holdersInfo
     msg += `\n🔒 Risks\nMint Authority → ${this.mintAuthorityAddress}\nFreeze Authority → ${this.freezeAuthorityAddress}\nMutable Metadata → ${this.mutableMeta} `
-    console.log(msg)
+    msg += `\n<a href="https://birdeye.so/token/${this.baseToken}?chain=solana">Birdeye</a> → <a href="http://raydium.io/swap/?inputCurrency=sol&outputCurrency=${this.baseToken}&fixed=in">Raydium</a> → <a href="https://dexscreener.com/solana/${this.baseToken}">Dexscreen</a> → <a href="https://rugcheck.xyz/tokens/${this.baseToken}">Rug Check</a>`
+    const keyboard = [
+      [
+        Markup.button.url(
+          "New Mint",
+          "https://t.me/newlymint"
+        )
+      ],
+    ];
+    await bot.telegram.sendMessage(
+      Config.CHANNEL_ID,
+      msg,
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: keyboard,
+        },
+      }
+    )
   }
 }
-fetchOpenBookMarket("4d2NqPKx6Xa4Cbfr3FckwnKeiJsw5EAtBN4nXHAzupEhxnbdkVvduQ1FZ5UQ4dwR8N5dsmhPeeprVjpKmiG8z1Y5")
-//startEvent()
+
+
+watchRayduim()
