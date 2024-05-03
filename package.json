@@ -1,0 +1,22 @@
+{
+  "name": "new-pools",
+  "version": "1.0.0",
+  "description": "fetch newly added pools solana ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx ./index.ts"
+  },
+  "author": "Uche David",
+  "type": "module",
+  "license": "ISC",
+  "dependencies": {
+    "@metaplex-foundation/js": "^0.20.1",
+    "@solana/web3.js": "^1.91.7",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.9.0"
+  }
+}
