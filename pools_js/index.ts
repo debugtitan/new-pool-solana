@@ -29,7 +29,6 @@ const fetchLiquidityMarket = async (signature: string) => {
     const web3 = new Connection(Config.RPC_CONNECTION)
     const txn = await web3.getParsedTransaction(signature, { maxSupportedTransactionVersion: 0 })
     const data: any = txn?.meta?.postTokenBalances
-    console.log(data, txn?.meta?.preTokenBalances, txn?.meta)
     const tokenAIndex = 0
     const tokenBIndex = 1
 
