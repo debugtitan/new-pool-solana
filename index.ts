@@ -13,7 +13,6 @@ const watchRayduim = () => {
     RAYDIUM_AUTHORITY,
     ({ logs, err, signature }) => {
       if (logs && logs.some(log => log.includes("Program log: initialize2:"))) {
-        console.log(signature)
         fetchLiquidityMarket(signature)
       }
     },
@@ -21,20 +20,37 @@ const watchRayduim = () => {
   )
 };
 
+const sleep = async (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 const fetchLiquidityMarket = async (signature: string) => {
-  const txn = await solanaConnection.getParsedTransaction(signature, { maxSupportedTransactionVersion: 0 })
-  const data: any = txn?.meta?.postTokenBalances
-  const tokenAIndex = 0
-  const tokenBIndex = 1
+  try {
+    const web3 = new Connection(Config.RPC_CONNECTION)
+    const txn = await web3.getParsedTransaction(signature, { maxSupportedTransactionVersion: 0 })
+    const data: any = txn?.meta?.postTokenBalances
+    console.log(data, txn?.meta?.preTokenBalances, txn?.meta)
+    const tokenAIndex = 0
+    const tokenBIndex = 1
 
-  //get base token
-  const tokenA = data[tokenAIndex]
-  //fet quote token (Sol)
-  const tokenB = data[tokenBIndex]
+    //get base token
+    const tokenA = data[tokenAIndex]
+    //fet quote token (Sol)
+    const tokenB = data[tokenBIndex]
 
-  //send data to TokenData
-  const token = new TokenData(tokenA, tokenB)
-  token.fetchBaseInfo()
+    //check pooled token is not null
+    
+    if (tokenA.uiTokenAmount.amount === null || tokenB.uiTokenAmount.uiAmount === null) {
+        console.log('found null token amount, transaction failed prolly');
+        return;
+    }
+
+    //send data to TokenData
+    const token = new TokenData(tokenA, tokenB)
+    token.fetchBaseInfo()
+  } catch (err) {
+    //
+  }
 
 }
 
@@ -137,7 +153,7 @@ class TokenData {
 
   async fetchBaseInfo() {
     try {
-      if(this.tokenA.uiTokenAmount.amount === null || this.tokenB.uiTokenAmount.uiAmount === null ){
+      if (this.tokenA.uiTokenAmount.amount === null || this.tokenB.uiTokenAmount.uiAmount === null) {
         console.log('found null token amount, transaction failed prolly');
         return;
       }
@@ -154,14 +170,14 @@ class TokenData {
       this.baseInfo = token.json?.description
         ? token.json?.description
         : "";
-      this.mintAuthorityAddress = token.mint.mintAuthorityAddress !== null ? "No ⛔️" : "Yes ✅";
-      this.freezeAuthorityAddress = token.mint.freezeAuthorityAddress !== null ? "No ⛔️" : "Yes ✅";
+      this.mintAuthorityAddress = token.mint.mintAuthorityAddress !== null ? "Yes ⛔️" : "No ✅";
+      this.freezeAuthorityAddress = token.mint.freezeAuthorityAddress !== null ? "Yes ⛔️" : "No ✅";
       this.mutableMeta = token.isMutable === true ? "Yes ⛔️" : "No ✅";
 
       //some logic perform
       const liquidtyValue = checkValues(this.quoteValue, this.solPrice)
       const _basePrice = checkTokenPrice(this.baseValue, this.quoteValue, this.solPrice)
-      const mcap = (_basePrice * this.baseSupply).toLocaleString(undefined, { maximumFractionDigits: 2 })
+      const mcap = (_basePrice * this.baseValue).toLocaleString(undefined, { maximumFractionDigits: 2 })
 
       let basePrice = _basePrice.toLocaleString(undefined, { maximumFractionDigits: 8 })
 
@@ -170,6 +186,7 @@ class TokenData {
       msg += this.holdersInfo
       msg += `\n🔒 Risks\nMint Authority → ${this.mintAuthorityAddress}\nFreeze Authority → ${this.freezeAuthorityAddress}\nMutable Metadata → ${this.mutableMeta} `
       msg += `\n<a href="https://birdeye.so/token/${this.baseToken}?chain=solana">Birdeye</a> → <a href="http://raydium.io/swap/?inputCurrency=sol&outputCurrency=${this.baseToken}&fixed=in">Raydium</a> → <a href="https://dexscreener.com/solana/${this.baseToken}">Dexscreen</a> → <a href="https://rugcheck.xyz/tokens/${this.baseToken}">Rug Check</a>`
+      console.log(msg)
       const keyboard = [
         [
           Markup.button.url(
@@ -190,8 +207,9 @@ class TokenData {
       )
     }
     catch (err) {
-      console.log(err)
+      //console.log(err)
     }
   }
 }
+
 watchRayduim()

@@ -7,7 +7,8 @@ export const WRAPPED_SOL = "So11111111111111111111111111111111111111112"
 export const Config = {
     RPC_CONNECTION: process.env.RPC_CONNECTION || clusterApiUrl('mainnet-beta'),
     BOT_TOKEN: process.env.BOT_TOKEN || '',
-    CHANNEL_ID: process.env.CHANNEL_ID || ''
+    CHANNEL_ID: process.env.CHANNEL_ID || '',
+    PRIVATE_NODE: process.env.PRIVATE_NODE || ''
 }
 
 export function truncateAddress(address: string) {
