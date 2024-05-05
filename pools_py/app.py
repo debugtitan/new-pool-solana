@@ -132,10 +132,10 @@ class RaydiumNewPools:
             _quote_token.ui_token_amount.ui_amount,
         )
         _token_supply = await self.fetch_token_supply(base_token)
-        _token_price = quote_token_pool_amount/base_token_pool_amount #token price in sol
-        _token_mcap = base_token_pool_amount * _token_price #mcap in sol
+        _token_price = calculate_asset_value(quote_token_pool_amount/base_token_pool_amount) #token price in sol
+        formatted_token_price = "{:.10f}".format(_token_price) 
+        _token_mcap = float(formatted_token_price)*float(base_token_pool_amount) #mcap $
         token_meta = await self.get_token_meta(base_token)
-        print(float(_token_price), _token_mcap)
         token_description = ""
         if token_meta['uri']:
             token_info = await self.fetch_token_description_from_uri(token_meta['uri'])
@@ -143,15 +143,13 @@ class RaydiumNewPools:
 
         token_name = token_meta['name'] if token_meta['name'] else ""
         token_symbol = token_meta['symbol'] if token_meta['symbol'] else ""
-        liquidty = calculate_asset_value(int(quote_token_pool_amount))
+        liquidty = format_number(calculate_asset_value(quote_token_pool_amount))
         token_supply = format_number(_token_supply)
-        token_price = calculate_asset_value(_token_price)
-        token_mcap = format_number(calculate_asset_value(_token_mcap))
+        token_mcap = format_number(_token_mcap)
         
         
-
         msg = f"{token_name} → ({token_symbol})\n\nMeta™\nBase: {format_number(base_token_pool_amount)} {token_name}\nQuote: {format_number(quote_token_pool_amount)} SOL → (${liquidty})\n\n"
-        msg += f"Token Mint → {token_supply} {token_name}\nPrice {token_symbol} → (${token_price})\nMarketCap → (${token_mcap})\n\n{token_description}\n\n"
+        msg += f"Token Mint → {token_supply} {token_name}\nPrice {token_symbol} → (${formatted_token_price})\nMarketCap → (${token_mcap})\n\n{token_description}\n\n"
         print(msg)
         
 
