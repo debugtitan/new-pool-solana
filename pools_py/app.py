@@ -74,7 +74,7 @@ class RaydiumNewPools:
         self.private_client = AsyncClient(config["PRIVATE_CLIENT"])
 
     async def subscribe_to_log(self):
-        async with connect(self.BASE_WSS_ENDPOINT) as websocket:
+        async with connect(self.BASE_WSS_ENDPOINT,ping_interval=None) as websocket:
             await websocket.logs_subscribe(
                 RpcTransactionLogsFilterMentions(self.RAYDIUM_AUTHORITY),
                 commitment="processed",
