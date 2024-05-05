@@ -4,13 +4,13 @@ from solana.rpc.async_api import AsyncClient
 from asyncstdlib import enumerate
 from solana.rpc.websocket_api import connect
 from solders.rpc.config import RpcTransactionLogsFilterMentions  # type: ignore
+from websockets.exceptions import ConnectionClosedError
 from conf import config, logger
 
 
 class RaydiumNewPools:
     """
     `RaydiumNewPools` events listener
-
     """
 
     BASE_WSS_ENDPOINT = "wss://api.mainnet-beta.solana.com"
@@ -35,15 +35,18 @@ class RaydiumNewPools:
             )
             logger.info("STARTED EVENT!!")
             while True:
-                data = await websocket.recv()
-                _result = data[0].result
-                if hasattr(_result, "value"):
-                    result = _result.value
-                    log_signature, logs = result.signature, result.logs
-                    if any("Program log: initialize2:" in log for log in logs):
-                        print(log_signature)
-                else:
-                    logger.warning(_result)
+                try:
+                    data = await websocket.recv()
+                    _result = data[0].result
+                    if hasattr(_result, "value"):
+                        result = _result.value
+                        log_signature, logs = result.signature, result.logs
+                        if any("Program log: initialize2:" in log for log in logs):
+                            print(log_signature)
+                    else:
+                        logger.warning(_result)
+                except ConnectionClosedError as e:
+                    logger.error(e)
 
     async def start(self):
         """Run bot"""
