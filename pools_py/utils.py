@@ -1,5 +1,4 @@
 import struct
-import base64
 import base58 # type: ignore
 from pycoingecko import CoinGeckoAPI
 
@@ -38,7 +37,7 @@ def format_number(n):
     
 def calculate_asset_value(amount):
     price_per_sol = cg.get_price('solana','usd')['solana']['usd']
-    return format_number(amount * price_per_sol)
+    return amount * price_per_sol
 
 #Recognition of code owners
 #https://github.com/metaplex-foundation/python-api/blob/main/metaplex/metadata.py
