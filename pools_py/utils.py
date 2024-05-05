@@ -39,6 +39,19 @@ def calculate_asset_value(amount):
     price_per_sol = cg.get_price('solana','usd')['solana']['usd']
     return amount * price_per_sol
 
+def calculate_percentage(total_supply, user_holdings):
+    percentage = (user_holdings / total_supply) * 100
+    return "{:.2f}".format(percentage)
+
+def truncate_address(address):
+    if len(address) <= 14:
+        return address
+    else:
+        prefix = address[:6]
+        suffix = address[-6:]
+        dots = '*' * 5
+        return prefix + dots + suffix
+
 #Recognition of code owners
 #https://github.com/metaplex-foundation/python-api/blob/main/metaplex/metadata.py
 
@@ -97,6 +110,6 @@ async def unpack_metadata_account(data):
         "primary_sale_happened": primary_sale_happened,
         "is_mutable": is_mutable,
     }
-    return metadata['data']
+    return metadata
 
 
