@@ -1,4 +1,6 @@
 solders
 solana
 python-dotenv
-asyncstdlib
+base58
+requests
+pycoingecko
