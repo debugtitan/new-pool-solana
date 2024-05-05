@@ -4,3 +4,4 @@ python-dotenv
 base58
 requests
 pycoingecko
+python-telegram-bot
