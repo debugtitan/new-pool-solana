@@ -1,4 +1,5 @@
 import asyncio
+import time
 from solders.pubkey import Pubkey  # type: ignore
 from solana.rpc.async_api import AsyncClient
 from asyncstdlib import enumerate
@@ -47,7 +48,13 @@ class RaydiumNewPools:
                         logger.warning(_result)
                 except ConnectionClosedError as e:
                     logger.error(e)
-
+                    time.sleep(10)
+                    
+    async def get_parsed_transaction(self, signature):
+        try:
+            txn = await self.private_client.get_transaction(signature)
+        except Exception as e:
+            logger.warning(f"get_parsed_transaction {e}")
     async def start(self):
         """Run bot"""
         _is_missing_key = [key for key in self.ENV_ATTR if key not in config]
