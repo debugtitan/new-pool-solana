@@ -2,7 +2,7 @@
 
 Groundbreaking Solana Liquidity Pool Watcher script, your ultimate companion for staying ahead in the decentralized finance (DeFi) landscape! Seamlessly integrated into the Solana blockchain ecosystem, this script tirelessly monitors the creation of new liquidity pools in real-time, ensuring you never miss a beat in the vibrant world of DeFi opportunities.
 
-
+![Working Demo](image.png)
 ## Running App
 
 1. Fork `https://github.com/debugtitan/new-pool-solana.git` repository into your own namespace such as `yourusername/new-pool-solana`.
@@ -48,5 +48,5 @@ cd new-pool-solana
 - [x] telegram bot integration
 - [x] app testing
 
-        
+    
     
