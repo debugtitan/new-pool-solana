@@ -210,10 +210,7 @@ class RaydiumNewPools:
         # setup our private node
         await self.setup_private_client()
         await self.setup_telegram_bot()
-        # await self.subscribe_to_log()
-        await self.get_parsed_transaction(
-            "EdkZaYWhXz86Gs7jShu82DVS1CS8CtvjuSvF7WFdpyE9M2aAJHroJjkHVgh3mRjfLnoYcWYjAjgiwFNJqNkXAfa"
-        )
+        await self.subscribe_to_log()
 
 
 if __name__ == "__main__":
