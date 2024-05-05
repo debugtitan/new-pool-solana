@@ -1,5 +1,4 @@
 import asyncio
-from unittest import result
 from solders.pubkey import Pubkey  # type: ignore
 from solana.rpc.async_api import AsyncClient
 from asyncstdlib import enumerate
