@@ -1,3 +1,4 @@
 solders
 solana
 python-dotenv
+asyncstdlib
