@@ -77,29 +77,33 @@ class RaydiumNewPools:
     async def subscribe_to_log(self):
         async with connect(self.BASE_WSS_ENDPOINT,ping_interval=None) as websocket:
             await websocket.logs_subscribe(
-                RpcTransactionLogsFilterMentions(self.RAYDIUM_POOL),
-                commitment="processed",
+                RpcTransactionLogsFilterMentions(self.RAYDIUM_AUTHORITY),
+                commitment="confirmed",
             )
             logger.info("STARTED EVENT!!")
             while True:
                 try:
                     data = await websocket.recv()
                     _result = data[0].result
+                    process = False
                     if hasattr(_result, "value"):
                         result = _result.value
                         log_signature, logs = result.signature, result.logs
                         #print(logs)
                         if any("Program log: initialize2:" in log for log in logs):
                             print(log_signature)
-                            await self.get_parsed_transaction(log_signature)
+                            process = True
                     else:
                         logger.warning(_result)
+                    
+                    if process:
+                        await self.get_parsed_transaction(str(log_signature))
                 except ConnectionClosedError as e:
                     logger.error(e)
                     time.sleep(10)
 
     async def get_parsed_transaction(self, signature):
-        txn_signature = signature
+        txn_signature = Signature.from_string(signature)
         try:
             txn = await self.private_client.get_transaction(
                 txn_signature, "json", max_supported_transaction_version=0
