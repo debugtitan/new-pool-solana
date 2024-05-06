@@ -91,6 +91,7 @@ class RaydiumNewPools:
                         #print(logs)
                         if any("Program log: initialize2:" in log for log in logs):
                             print(log_signature)
+                            await self.get_parsed_transaction(log_signature)
                     else:
                         logger.warning(_result)
                 except ConnectionClosedError as e:
