@@ -101,6 +101,7 @@ class RaydiumNewPools:
                 except ConnectionClosedError as e:
                     logger.error(e)
                     time.sleep(10)
+                    await self.start()
 
     async def get_parsed_transaction(self, signature):
         txn_signature = Signature.from_string(signature)
