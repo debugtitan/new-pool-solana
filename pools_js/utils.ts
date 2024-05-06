@@ -2,6 +2,7 @@ import { PublicKey, clusterApiUrl } from "@solana/web3.js";
 import 'dotenv/config.js'
 
 export const RAYDIUM_AUTHORITY = new PublicKey("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1")
+export const RAYDIUM_POOL = new PublicKey("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8")
 export const WRAPPED_SOL = "So11111111111111111111111111111111111111112"
 
 export const Config = {

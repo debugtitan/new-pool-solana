@@ -2,7 +2,7 @@ import { Connection, clusterApiUrl, PublicKey, LAMPORTS_PER_SOL } from "@solana/
 import { Metaplex } from "@metaplex-foundation/js";
 import { CoinGeckoClient } from "coingecko-api-v3";
 import { Telegraf, Markup } from "telegraf";
-import { RAYDIUM_AUTHORITY, WRAPPED_SOL, TokenInfo, Config, truncateAddress, calculatePercentage, formatTokenSupply, checkValues, checkTokenPrice } from "./utils.js";
+import { RAYDIUM_AUTHORITY, WRAPPED_SOL, TokenInfo, Config, truncateAddress, calculatePercentage, formatTokenSupply, checkValues, checkTokenPrice, RAYDIUM_POOL } from "./utils.js";
 
 const solanaConnection = new Connection(clusterApiUrl('mainnet-beta'))
 const bot = new Telegraf(Config.BOT_TOKEN);
@@ -12,6 +12,7 @@ const watchRayduim = () => {
   solanaConnection.onLogs(
     RAYDIUM_AUTHORITY,
     ({ logs, err, signature }) => {
+      //console.log(logs)
       if (logs && logs.some(log => log.includes("Program log: initialize2:"))) {
         fetchLiquidityMarket(signature)
       }

@@ -48,6 +48,7 @@ class RaydiumNewPools:
     RAYDIUM_AUTHORITY = Pubkey.from_string(
         "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"
     )
+    RAYDIUM_POOL = Pubkey.from_string("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8")
     METADATA_PROGRAM_ID = Pubkey.from_string(
         "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
     )
@@ -76,7 +77,7 @@ class RaydiumNewPools:
     async def subscribe_to_log(self):
         async with connect(self.BASE_WSS_ENDPOINT,ping_interval=None) as websocket:
             await websocket.logs_subscribe(
-                RpcTransactionLogsFilterMentions(self.RAYDIUM_AUTHORITY),
+                RpcTransactionLogsFilterMentions(self.RAYDIUM_POOL),
                 commitment="processed",
             )
             logger.info("STARTED EVENT!!")
@@ -87,6 +88,7 @@ class RaydiumNewPools:
                     if hasattr(_result, "value"):
                         result = _result.value
                         log_signature, logs = result.signature, result.logs
+                        print(logs)
                         if any("Program log: initialize2:" in log for log in logs):
                             print(log_signature)
                     else:
