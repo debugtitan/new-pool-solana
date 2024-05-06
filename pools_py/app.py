@@ -88,7 +88,7 @@ class RaydiumNewPools:
                     if hasattr(_result, "value"):
                         result = _result.value
                         log_signature, logs = result.signature, result.logs
-                        print(logs)
+                        #print(logs)
                         if any("Program log: initialize2:" in log for log in logs):
                             print(log_signature)
                     else:
