@@ -99,7 +99,7 @@ class RaydiumNewPools:
                     time.sleep(10)
 
     async def get_parsed_transaction(self, signature):
-        txn_signature = Signature.from_string(signature)
+        txn_signature = Signature(signature)
         try:
             txn = await self.private_client.get_transaction(
                 txn_signature, "json", max_supported_transaction_version=0
