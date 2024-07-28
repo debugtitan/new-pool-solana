@@ -1,6 +1,7 @@
 import asyncio
 import time
 import requests
+from contextlib import suppress
 from solders.pubkey import Pubkey  # type: ignore
 from solders.rpc.config import RpcTransactionLogsFilterMentions  # type: ignore
 from solders.signature import Signature  # type: ignore
@@ -218,4 +219,5 @@ class RaydiumNewPools:
 
 
 if __name__ == "__main__":
-    asyncio.run(RaydiumNewPools().start())
+    with suppress(KeyboardInterrupt):
+        asyncio.run(RaydiumNewPools().start())
