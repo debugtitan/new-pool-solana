@@ -60,19 +60,16 @@ class RaydiumNewPools:
 
     def __init__(self):
         self.client = AsyncClient(self.BASE_WSS_ENDPOINT)
-        self.private_client: AsyncClient = None
+        self.private_client: AsyncClient = AsyncClient(config["PRIVATE_CLIENT"])
+        self.setup_telegram_bot()
 
-    async def setup_telegram_bot(self):
+    def setup_telegram_bot(self):
         """initialize telegram bot"""
         self.PTB = Application.builder().token(config["TELEGRAM_BOT_TOKEN"]).build()
         self.CHANNEL = int(config["TELEGRAM_CHANNEL"])
         self.KEYBOARD = InlineKeyboardMarkup(
             [[InlineKeyboardButton("New Mint", "https://t.me/newlymint")]]
         )
-
-    async def setup_private_client(self):
-        """setup a private rpc client endpoint"""
-        self.private_client = AsyncClient(config["PRIVATE_CLIENT"])
 
     async def subscribe_to_log(self):
         async with connect(self.BASE_WSS_ENDPOINT,ping_interval=None) as websocket:
@@ -105,6 +102,7 @@ class RaydiumNewPools:
 
     async def get_parsed_transaction(self, signature):
         txn_signature = Signature.from_string(signature)
+        print(self.client)
         try:
             txn = await self.private_client.get_transaction(
                 txn_signature, "json", max_supported_transaction_version=0
@@ -215,9 +213,7 @@ class RaydiumNewPools:
             msg = f"Set the following {len(_is_missing_key)} key(s) in the .env file: {', '.join(_is_missing_key)}"
             logger.info(msg)
             exit()
-        # setup our private node
-        await self.setup_private_client()
-        await self.setup_telegram_bot()
+        
         await self.subscribe_to_log()
 
 
